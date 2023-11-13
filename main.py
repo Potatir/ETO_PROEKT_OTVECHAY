@@ -19,7 +19,7 @@ class Appwin:
             print("Не получилось создать окно")
     def get_data(self):
         try:
-            self.conn = psycopg2.connect(database = 'postgres', user = 'postgres', password = '222222', port = '5432')
+            self.conn = psycopg2.connect(database = 'postgres', user = 'postgres', password = '123', port = '5432')
             self.cur = self.conn.cursor()
             self.cur.execute("SELECT temperature FROM weather_data")
             self.data = self.cur.fetchall()
@@ -29,7 +29,7 @@ class Appwin:
             print("не удалось подключиться к бд")
     def graph(self):
         try:
-            self.conn = psycopg2.connect(database = 'postgres', user = 'postgres', password = '222222', port = '5432')
+            self.conn = psycopg2.connect(database = 'postgres', user = 'postgres', password = '123', port = '5432')
             self.cur = self.conn.cursor()
             self.cur.execute("SELECT date_ FROM weather_data")
             self.date = self.cur.fetchall()
@@ -38,8 +38,9 @@ class Appwin:
             fig, ax = plt.subplots(figsize=(8, 6))
             ax.plot(self.date, self.data, label="График данных")
 
-            ax.set_xlabel("Время")
-            ax.set_ylabel("Значение")
+            ax.set_xlabel("Дата")
+            ax.set_ylabel("Температура")
+            ax.axes.get_xaxis().set_visible(False)
             ax.legend()
             if self.canvas:
                 self.canvas.get_tk_widget().destroy()
@@ -51,12 +52,6 @@ class Appwin:
             traceback.print_exc()
     def update_graph(self):
         self.graph()
-
-        
-
-
-
-
 
 
 first = Appwin()
