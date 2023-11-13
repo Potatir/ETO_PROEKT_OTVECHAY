@@ -1,57 +1,64 @@
 from tkinter import *
 from tkinter import ttk
-import psycopg2
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import requests
 import traceback
 
 class Appwin:
-    def __init__(self):
-        try:
-            self.win = Tk()
-            self.win.grid()
-            self.update_button = ttk.Button(self.win, text="Обновить график", command=self.update_graph)
-            self.update_button.grid(row=0, column=0, padx=8, pady=8)
-            self.canvas = None  
-            self.graph()  
-            self.win.mainloop()
-        except:
-            print("Не получилось создать окно")
-    def get_data(self):
-        try:
-            self.conn = psycopg2.connect(database = 'postgres', user = 'postgres', password = '123', port = '5432')
-            self.cur = self.conn.cursor()
-            self.cur.execute("SELECT temperature FROM weather_data")
-            self.data = self.cur.fetchall()
-            self.conn.close()
-            return(self.data)
-        except ConnectionError:
-            print("не удалось подключиться к бд")
-    def graph(self):
-        try:
-            self.conn = psycopg2.connect(database = 'postgres', user = 'postgres', password = '123', port = '5432')
-            self.cur = self.conn.cursor()
-            self.cur.execute("SELECT date_ FROM weather_data")
-            self.date = self.cur.fetchall()
-            self.conn.close()
-            self.data = self.get_data()
-            fig, ax = plt.subplots(figsize=(8, 6))
-            ax.plot(self.date, self.data, label="График данных")
+    def __init__(self, api_key, city):
+        self.API_KEY = api_key
+        self.CITY = city
 
-            ax.set_xlabel("Дата")
-            ax.set_ylabel("Температура")
-            ax.axes.get_xaxis().set_visible(False)
-            ax.legend()
-            if self.canvas:
-                self.canvas.get_tk_widget().destroy()
+        self.win = Tk()
+        self.win.title("Weather App")
+        self.win.geometry("300x200")
 
-            self.canvas = FigureCanvasTkAgg(fig, master=self.win)
-            self.canvas_widget = self.canvas.get_tk_widget()
-            self.canvas_widget.grid(row=5, column=0, padx=5, pady=5)
+        self.update_button = ttk.Button(self.win, text="Обновить график", command=self.update_weather_widgets)
+        self.update_button.pack(pady=10)
+
+        self.temperature_label = ttk.Label(self.win, text="Температура:")
+        self.temperature_label.pack(pady=5)
+
+        self.humidity_label = ttk.Label(self.win, text="Влажность:")
+        self.humidity_label.pack(pady=5)
+
+        self.wind_speed_label = ttk.Label(self.win, text="Скорость ветра:")
+        self.wind_speed_label.pack(pady=5)
+
+        self.pressure_label = ttk.Label(self.win, text="Давление:")
+        self.pressure_label.pack(pady=5)
+
+        self.update_weather_widgets()
+        self.win.mainloop()
+
+    def get_weather_data(self):
+        try:
+            url = f'http://api.openweathermap.org/data/2.5/weather?q={self.CITY}&appid={self.API_KEY}&units=metric'
+            response = requests.get(url)
+            data = response.json()
+
+            temperature = data['main']['temp']
+            humidity = data['main']['humidity']
+            wind_speed = data['wind']['speed']
+            pressure = data['main']['pressure']
+
+            return temperature, humidity, wind_speed, pressure
+
         except Exception:
             traceback.print_exc()
-    def update_graph(self):
-        self.graph()
 
+    def update_weather_widgets(self):
+        try:
+            temperature, humidity, wind_speed, pressure = self.get_weather_data()
 
-first = Appwin()
+            self.temperature_label.config(text=f"Температура: {temperature} °C")
+            self.humidity_label.config(text=f"Влажность: {humidity}%")
+            self.wind_speed_label.config(text=f"Скорость ветра: {wind_speed} м/с")
+            self.pressure_label.config(text=f"Давление: {pressure} мм рт. ст.")
+
+        except Exception:
+            traceback.print_exc()
+
+if __name__ == "__main__":
+    api_key = '8e9cf68cbd7790771fedf34c66c97c9f'
+    city = 'Astana'
+    first = Appwin(api_key, city)

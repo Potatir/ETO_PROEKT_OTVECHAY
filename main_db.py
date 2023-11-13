@@ -9,7 +9,7 @@ CITY = 'Astana'
 name = 'main'
 
 def create_table():
-    connection = psycopg2.connect(database = 'postgres', user = 'postgres', password = '123', port = '5432')
+    connection = psycopg2.connect(database = 'postgres', user = 'postgres', password = '1234567', port = '5432')
     cursor = connection.cursor()
 
     cursor.execute('''
@@ -24,7 +24,7 @@ def create_table():
     connection.close()
 
 def reset_table():
-    connection = psycopg2.connect(database = 'postgres', user = 'postgres', password = '123', port = '5432')
+    connection = psycopg2.connect(database = 'postgres', user = 'postgres', password = '1234567', port = '5432')
     cursor = connection.cursor()
 
     cursor.execute('DROP TABLE IF EXISTS weather_data')
@@ -34,7 +34,7 @@ def reset_table():
     connection.close()
 
 def insert_data(date_, temperature):
-    connection = psycopg2.connect(database = 'postgres', user = 'postgres', password = '123', port = '5432')
+    connection = psycopg2.connect(database = 'postgres', user = 'postgres', password = '1234567', port = '5432')
     cursor = connection.cursor()
 
     cursor.execute('INSERT INTO weather_data (date_, temperature) VALUES (%s, %s)', (date_, temperature))
